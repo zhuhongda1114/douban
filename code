@@ -1,0 +1,24 @@
+# douban book review
+#以《四季啊慢慢走》为例，爬取豆瓣书评
+
+import requests
+import re
+import json
+
+url = "https://book.douban.com/subject/27169757/reviews"
+res = requests.get(url)
+html=res.text
+#获取评论用户的id
+reader = re.findall('<div id="review_\d{1,}_short" class="review-short" data-rid=\"\d{1,}\"',html)
+id_list = []
+for data_rid in reader:
+    data_rid = data_rid.split()[-1]
+    ids = re.findall('\d{1,}', data_rid)
+    for id in ids:
+        id_list.append(id)
+#构造书评的真实地址并获取评论全文
+for id in id_list:
+    reviews_url = 'https://book.douban.com/j/review/'+str(id)+'/full'
+    req = requests.get(reviews_url)
+    ob_json = json.loads(req.text)
+    review = ob_json['html']
